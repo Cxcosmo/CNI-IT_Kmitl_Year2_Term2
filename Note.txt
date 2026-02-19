@@ -1,0 +1,79 @@
+# DNS ทำแล้วแต่ ping ออกไม่ได้
+เจอ : ping: google.com: Temporary failure in name resolution
+วิธีแก้ :
+$ sudo nano /etc/resolv.conf
+-> ถ้าไฟล์ว่างใส่ nameserver DNS ที่ตั้ง เช่น 8.8.8.8 หรือ IP router ที่ทำ DNS
+$ sudo systemctl restart systemd-resolved.service
+--- or ---
+$ sudo systemctl restart networking
+
+------------------------
+
+# TFTP - Server
+Linux : 
+$ sudo apt update
+$ sudo apt install tftpd-hpa
+$ sudo systemctl status tftpd-hpa
+$ sudo nano /etc/default/tftpd-hpa
+$ sudo mkdir /tftp
+$ sudo chown tftp:tftp /tftp
+$ sudo systemctl restart tftpd-hpa
+$ sudo systemctl status tftpd-hpa
+
+------------------------
+
+# TFTP - Client
+Linux : 
+$ sudo apt install tftp-hpa
+$ tftp ip-server
+tftp> verbose
+tftp> put filename
+tftp> get filename
+tftp> quit
+
+------------------------
+
+# ขอ IP DHCP
+
+$ sudo dhclient -v eth0
+ทำ ipv6 route ด้วย
+
+-------------------------
+
+$ cd /etc/netplan
+$ sudo nano xxx.yaml
+
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: false
+      dhcp6: false
+      addresses:
+        - 172.60.245.130/27
+        - 2001:6707:66:245::2/64
+        - FE80::2/64
+      gateway4: 172.60.245.129
+      gateway6: FE80::1
+      nameservers:
+        addresses:
+          - 192.168.1.1
+
+$ sudo netplan apply
+$ sudo systemctl restart systemd-networkd
+
+------------------------
+
+วิธีเพิ่ม route ใน Windows
+> route add < Network Address > MASK < Subnetmask > < Gateway Of your Topology >
+วิธีลบ route ใน Windows
+> route delete < Network Address > MASK < Subnetmask > < Gateway Of your Topology >
+--- or ---
+> route add < Network Address > MASK < Subnetmask >
+(อันล่างจะลบทั้งหมดที่เป็นของวงที่เราลบ)
+
+------------------------
+
+VM CLI Login Net คณะ
+$ curl -X POST "https://login.it.kmitl.ac.th/auth" -k -H "Content-Type: application/json" -d '{"username":"it67070xxx","password":"xxx"}'
+
