@@ -35,7 +35,10 @@ tftp> quit
 
 # ขอ IP DHCP
 
-$ sudo dhclient -v eth0
+ขอ IP $ sudo dhclient eth0
+ขอ IP แบบ Reboot หาย $ sudo dhclient -v eth0
+คืน IP $ sudo dhclient -r eth0
+
 ทำ ipv6 route ด้วย
 
 -------------------------
@@ -77,3 +80,74 @@ $ sudo systemctl restart systemd-networkd
 VM CLI Login Net คณะ
 $ curl -X POST "https://login.it.kmitl.ac.th/auth" -k -H "Content-Type: application/json" -d '{"username":"it67070xxx","password":"xxx"}'
 
+------------------------
+
+Hashing SHA256
+> certutil -hashfile <File_name> SHA256
+
+Hashing MD5
+> certutil -hashfile <File_name> MD5
+
+------------------------
+
+ssh โดยเข้ารหัสเอง ()
+
+> ssh -oKexAlgorithms=+diffie-hellman-group14-sha1 -oHostKeyAlgorithms=+ssh-rsa <username>@<ip>
+
+------------------------
+
+Config Static IP Linux ( Lost when Reboot )
+
+เพิ่ม IP > sudo ip addr add <ip>/<subnetmask> dev <port>
+เพิ่ม Default Gateway > sudo ip route add default via <Gateway>
+( กรณีอันบนไม่ได้ลองใส่ Port ไปด้วย > sudo ip route add default via <Gateway> dev <port>
+Up / Down Port > sudo ip link set <port> { up / down }
+
+------------------------
+
+Config Static IP Linux ( Non-Lost when Reboot )
+
+> sudo nano /etc/network/interfaces
+
+|auto <port>
+|iface <port> inet static
+|	address <IP>
+|	netmask <Subnetmask>
+|	gateway <Gateway>
+
+> sudo systemctl restart networking
+
+------------------------
+
+Create Service Set Static IP Linux ( Non-Lost when Reboot )
+
+> sudo nano etc/add-ip.sh
+
+|#!/bin/bash
+|
+|sudo ip addr add <ip>/<subnetmask> dev <port>
+|sudo ip route add default via <Gateway>
+|sudo ip link set <port> up
+
+> sudo nano /etc/system/system/add-ip.service
+
+|[Service]
+|ExecStart=/etc/add-ip.sh
+|
+|[Install]
+|WantedBy=multi-user.target
+
+> sudo systemctl daemon-reload
+> sudo systemctl enable add-ip
+> sudo systemctl start add-ip
+
+------------------------
+
+Config DHCP IP Linux
+
+> sudo nano /etc/network/interfaces
+
+|auto <port>
+|iface <port> inet dhcp
+
+> sudo systemctl restart networking
